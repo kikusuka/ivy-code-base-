@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+transformers
+onnxruntime
+numpy
+huggingface_hub
