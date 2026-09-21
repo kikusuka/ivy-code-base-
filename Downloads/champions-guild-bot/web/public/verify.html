@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guild Verification · Champions of the Shattered Realm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue-deep:    #0a1628;
+      --blue-dark:    #0d2145;
+      --blue-mid:     #1a4a8a;
+      --blue-bright:  #2d7dd2;
+      --blue-glow:    #4facf7;
+      --blue-ice:     #a8d8f8;
+      --blue-pale:    #e8f4fd;
+      --white:        #ffffff;
+      --text-dim:     #7ab3d9;
+      --success:      #22d3a0;
+      --error:        #f87171;
+      --warn:         #fbbf24;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--blue-deep);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated background orbs */
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      pointer-events: none;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+    body::before {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, var(--blue-bright), transparent);
+      top: -200px; left: -200px;
+    }
+    body::after {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, var(--blue-glow), transparent);
+      bottom: -150px; right: -150px;
+      animation-delay: -6s;
+    }
+    @keyframes drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(40px, 30px) scale(1.1); }
+    }
+
+    /* Grid lines overlay */
+    .grid {
+      position: fixed; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(45, 125, 210, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(45, 125, 210, 0.05) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    .card {
+      position: relative;
+      width: min(480px, 94vw);
+      background: linear-gradient(160deg, rgba(13,33,69,0.95) 0%, rgba(10,22,40,0.98) 100%);
+      border: 1px solid rgba(79, 172, 247, 0.25);
+      border-radius: 20px;
+      padding: 48px 44px 44px;
+      box-shadow:
+        0 0 0 1px rgba(79,172,247,0.08),
+        0 30px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(45,125,210,0.12);
+      backdrop-filter: blur(20px);
+    }
+
+    /* Top accent bar */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 44px; right: 44px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--blue-glow), var(--blue-bright), transparent);
+      border-radius: 0 0 4px 4px;
+    }
+
+    .shield {
+      width: 64px; height: 64px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, var(--blue-mid), var(--blue-bright));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 0 24px rgba(79,172,247,0.4), 0 0 48px rgba(45,125,210,0.2);
+      animation: pulse-shield 3s ease-in-out infinite;
+    }
+    @keyframes pulse-shield {
+      0%, 100% { box-shadow: 0 0 24px rgba(79,172,247,0.4), 0 0 48px rgba(45,125,210,0.2); }
+      50%       { box-shadow: 0 0 36px rgba(79,172,247,0.7), 0 0 72px rgba(45,125,210,0.35); }
+    }
+
+    h1 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--white);
+      text-align: center;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 13.5px;
+      font-weight: 300;
+      margin-bottom: 36px;
+      line-height: 1.5;
+    }
+    .subtitle strong { color: var(--blue-ice); font-weight: 500; }
+
+    .timer-bar-wrap {
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      height: 4px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .timer-bar {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--blue-bright), var(--blue-glow));
+      border-radius: 4px;
+      transition: width 1s linear, background 0.5s;
+    }
+    .timer-bar.urgent { background: linear-gradient(90deg, var(--error), var(--warn)); }
+    .timer-label {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: -20px;
+      margin-bottom: 24px;
+    }
+    .timer-label span { color: var(--blue-glow); font-weight: 500; }
+    .timer-label.urgent span { color: var(--warn); }
+
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .otp-input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(79,172,247,0.25);
+      border-radius: 10px;
+      padding: 16px 20px;
+      color: var(--white);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    .otp-input::placeholder { color: rgba(255,255,255,0.15); letter-spacing: 0.1em; font-size: 20px; }
+    .otp-input:focus {
+      border-color: var(--blue-glow);
+      box-shadow: 0 0 0 3px rgba(79,172,247,0.15), 0 0 20px rgba(79,172,247,0.1);
+      background: rgba(255,255,255,0.07);
+    }
+
+    .btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--blue-mid), var(--blue-bright));
+      border: none;
+      border-radius: 10px;
+      color: var(--white);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(45,125,210,0.35);
+    }
+    .btn:hover:not(:disabled) {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(45,125,210,0.5);
+    }
+    .btn:active:not(:disabled) { transform: translateY(0); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .msg {
+      margin-top: 18px;
+      padding: 13px 16px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      display: none;
+    }
+    .msg.error   { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: var(--error); }
+    .msg.success { background: rgba(34,211,160,0.10); border: 1px solid rgba(34,211,160,0.3); color: var(--success); }
+    .msg.show { display: block; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      margin: 28px 0 20px;
+    }
+
+    .hint {
+      text-align: center;
+      font-size: 12px;
+      color: rgba(122,179,217,0.6);
+      line-height: 1.6;
+    }
+
+    /* Success state */
+    .success-view { display: none; text-align: center; }
+    .success-view.show { display: block; }
+    .success-icon {
+      font-size: 56px;
+      margin-bottom: 16px;
+      animation: pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    }
+    @keyframes pop {
+      0%   { transform: scale(0); opacity: 0; }
+      80%  { transform: scale(1.15); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .success-view h2 {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 28px; font-weight: 700;
+      color: var(--success); text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+    .success-view p { color: var(--text-dim); font-size: 14px; line-height: 1.6; }
+
+    .form-view { transition: opacity 0.3s; }
+    .form-view.fade { opacity: 0; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="card">
+    <div class="shield">🛡️</div>
+
+    <!-- Form view -->
+    <div class="form-view" id="formView">
+      <h1>Identity Verification</h1>
+      <p class="subtitle">Check your <strong>Discord DMs</strong> for your 6-digit code and enter it below.</p>
+
+      <div class="timer-bar-wrap">
+        <div class="timer-bar" id="timerBar"></div>
+      </div>
+      <div class="timer-label" id="timerLabel"><span id="timerCount">2:00</span> remaining</div>
+
+      <label for="otpField">Your OTP Code</label>
+      <input
+        id="otpField"
+        class="otp-input"
+        type="text"
+        inputmode="numeric"
+        maxlength="6"
+        placeholder="● ● ● ● ● ●"
+        autocomplete="one-time-code"
+      />
+
+      <button class="btn" id="verifyBtn" onclick="submitOTP()">Verify Identity</button>
+
+      <div class="msg" id="statusMsg"></div>
+
+      <hr class="divider" />
+      <p class="hint">
+        Didn't get a DM? Make sure your DMs are open.<br />
+        Codes expire after <strong>2 minutes</strong> and are single-use.
+      </p>
+    </div>
+
+    <!-- Success view -->
+    <div class="success-view" id="successView">
+      <div class="success-icon">✅</div>
+      <h2>Verified!</h2>
+      <p>You're now a full member of the guild.<br />Head back to Discord to explore. 🎉</p>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL = 120; // 2 minutes in seconds
+    let remaining = TOTAL;
+    let expired = false;
+
+    const bar = document.getElementById('timerBar');
+    const count = document.getElementById('timerCount');
+    const label = document.getElementById('timerLabel');
+    const btn = document.getElementById('verifyBtn');
+    const input = document.getElementById('otpField');
+
+    // Format seconds as M:SS
+    function fmt(s) {
+      return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    }
+
+    const timer = setInterval(() => {
+      remaining--;
+      const pct = (remaining / TOTAL) * 100;
+      bar.style.width = pct + '%';
+      count.textContent = fmt(remaining);
+
+      if (remaining <= 30) {
+        bar.classList.add('urgent');
+        label.classList.add('urgent');
+      }
+      if (remaining <= 0) {
+        clearInterval(timer);
+        expired = true;
+        btn.disabled = true;
+        input.disabled = true;
+        showMsg('error', '⏰ Your code has expired. Go back to Discord and request a new one.');
+      }
+    }, 1000);
+
+    // Only allow digits
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/\D/g, '').slice(0, 6);
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitOTP();
+    });
+
+    function showMsg(type, text) {
+      const el = document.getElementById('statusMsg');
+      el.className = `msg ${type} show`;
+      el.textContent = text;
+    }
+
+    async function submitOTP() {
+      if (expired) return;
+      const code = input.value.trim();
+      if (code.length !== 6) {
+        showMsg('error', 'Please enter all 6 digits of your code.');
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      try {
+        const res = await fetch('/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code }),
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          clearInterval(timer);
+          document.getElementById('formView').classList.add('fade');
+          setTimeout(() => {
+            document.getElementById('formView').style.display = 'none';
+            document.getElementById('successView').classList.add('show');
+          }, 300);
+        } else {
+          showMsg('error', data.message);
+          btn.disabled = false;
+          btn.textContent = 'Verify Identity';
+        }
+      } catch {
+        showMsg('error', '⚠️ Network error. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Verify Identity';
+      }
+    }
+  </script>
+</body>
+</html>
